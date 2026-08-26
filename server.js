@@ -5,6 +5,17 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
+// ==============================================
+// 💚 HEALTH CHECK — KEEP IT ALIVE FOREVER!
+// ==============================================
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "🟢 ONLINE",
+    message: "Prime Wallet Bank API — Running 24/7",
+    time: new Date().toLocaleString()
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
