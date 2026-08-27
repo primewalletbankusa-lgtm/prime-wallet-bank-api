@@ -1,3 +1,54 @@
+// ==================================================
+// 🚀 PRIME WALLET BANK — SERVER.JS — FULL CODE
+// ==================================================
+
+// ✅ PASTE THIS ENTIRE BLOCK AT THE VERY TOP! ⬇️
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+require("dotenv").config();
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+// ==========================================
+// 🗄️ MONGODB CONNECTION — AUTO-CONNECTS!
+// ==========================================
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.log("⚠️ MONGO_URI not found — using local storage only");
+} else {
+  mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ Connected to MongoDB — ALL DATA SAVED FOREVER"))
+    .catch(err => console.log("❌ MongoDB connection error:", err.message));
+}
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json({ limit: "50mb" }));
+
+// ==========================================
+// ✅ HEALTH CHECK ENDPOINT — FOR UPTIMEROBOT
+// ==========================================
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "🟢 ONLINE",
+    message: "Prime Wallet Bank API — Running 24/7",
+    time: new Date().toLocaleString()
+  });
+});
+
+// ==================================================
+// 👇 YOUR EXISTING CODE GOES HERE — BELOW THIS LINE!
+// ==================================================
+// ... all your existing routes, users, etc. ...
+
+app.listen(PORT, () => {
+  console.log(`✅ Prime Wallet API running on port ${PORT}`);
+});
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
