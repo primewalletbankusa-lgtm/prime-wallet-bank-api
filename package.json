@@ -1,14 +1,20 @@
 {
-  "name": "prime-wallet-api",
+  "name": "prime-wallet-bank-api",
   "version": "1.0.0",
-  "description": "Backend for Prime Wallet Bank",
+  "description": "Prime Wallet Bank — Full Banking API",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.19.2",
+    "mongoose": "^7.6.3",
     "cors": "^2.8.5",
-    "body-parser": "^1.20.2"
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
